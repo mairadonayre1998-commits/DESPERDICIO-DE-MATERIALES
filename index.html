@@ -17,3 +17,393 @@
     <!-- FontAwesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased pb-12">
+
+    <!-- Header Principal -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-500 p-2.5 rounded-xl shadow-lg">
+                    <i class="fa-solid fa-hard-hat text-slate-900 text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">Control de Concreto - Obra</h1>
+                    <p class="text-xs text-slate-400">Gestión de Mermas, Volúmenes y Power BI Ready</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="abrirModalPowerBI()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold shadow transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-chart-pie"></i> Guía Power BI
+                </button>
+                <button onclick="exportarCSV()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold shadow transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-download"></i> Exportar CSV
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Columna Izquierda: Formulario de Registro -->
+        <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 h-fit">
+            <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2 border-b pb-2">
+                <i class="fa-solid fa-truck-ramp-box text-amber-600"></i> Registrar Guía de Mixer
+            </h2>
+            
+            <form id="formGuia" onsubmit="registrarGuia(event)" class="space-y-4 text-sm">
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Fecha de Vaciado</label>
+                    <input type="date" id="fecha" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">N° de Guía</label>
+                        <input type="text" id="nroGuia" placeholder="Ej. G-00123" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Proveedor</label>
+                        <input type="text" id="proveedor" placeholder="Ej. UNICON" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Elemento Estructural / Partida</label>
+                    <select id="elemento" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 outline-none bg-white">
+                        <option value="">Seleccione elemento...</option>
+                        <option value="Zapatas">Zapatas</option>
+                        <option value="Columnas">Columnas</option>
+                        <option value="Vigas">Vigas</option>
+                        <option value="Losas Aligeradas/Macizas">Losas Aligeradas / Macizas</option>
+                        <option value="Placas / Muros de Corte">Placas / Muros de Corte</option>
+                        <option value="Falsopiso / Pavimento">Falsopiso / Pavimento</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Vol. Teórico ($m^3$)</label>
+                        <input type="number" step="0.01" id="volTeorico" placeholder="0.00" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Vol. Real / Guía ($m^3$)</label>
+                        <input type="number" step="0.01" id="volReal" placeholder="0.00" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Costo Unitario ($/m^3$)</label>
+                    <input type="number" step="0.01" id="costoUnitario" value="280.00" required class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Observaciones</label>
+                    <textarea id="observaciones" rows="2" placeholder="Ej. Merma por bombeo, sobrante en tolva..." class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 outline-none"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus-circle"></i> Registrar Vaciado
+                </button>
+            </form>
+        </section>
+
+        <!-- Columna Derecha: Dashboard y KPIs -->
+        <section class="lg:col-span-2 space-y-6">
+            
+            <!-- Tarjetas KPIs Globales -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <p class="text-xs text-slate-500 font-medium">Volumen Teórico Total</p>
+                    <p id="kpiTeorico" class="text-xl font-bold text-slate-800 mt-1">0.00 m³</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <p class="text-xs text-slate-500 font-medium">Volumen Entregado</p>
+                    <p id="kpiReal" class="text-xl font-bold text-slate-800 mt-1">0.00 m³</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <p class="text-xs text-slate-500 font-medium">% Desperdicio Acum.</p>
+                    <p id="kpiPorcentaje" class="text-xl font-bold text-emerald-600 mt-1">0.00%</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <p class="text-xs text-slate-500 font-medium">Costo Acumulado Pérdida</p>
+                    <p id="kpiCosto" class="text-xl font-bold text-rose-600 mt-1">$ 0.00</p>
+                </div>
+            </div>
+
+            <!-- Resumen por Semana -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center justify-between">
+                    <span><i class="fa-solid fa-calendar-week text-blue-600 mr-2"></i> Resumen por Semana Operativa</span>
+                    <span class="text-xs text-slate-400 font-normal">Tolerancia estándar: 3%</span>
+                </h3>
+                <div class="overflow-x-auto max-h-56">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 border-b">
+                                <th class="p-2">Semana</th>
+                                <th class="p-2">Vol. Teórico</th>
+                                <th class="p-2">Vol. Real</th>
+                                <th class="p-2">Merma (m³)</th>
+                                <th class="p-2">% Desp.</th>
+                                <th class="p-2">Costo Merma</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaSemanalBody">
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-slate-400">Sin registros de guías aún.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Historial de Guías Registradas -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-sm font-bold text-slate-900">
+                        <i class="fa-solid fa-list-check text-amber-600 mr-2"></i> Detalle de Guías Ingresadas
+                    </h3>
+                    <button onclick="limpiarRegistros()" class="text-xs text-rose-600 hover:underline">Limpiar todo</button>
+                </div>
+                <div class="overflow-x-auto max-h-64">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 border-b">
+                                <th class="p-2">Fecha</th>
+                                <th class="p-2">Guía</th>
+                                <th class="p-2">Elemento</th>
+                                <th class="p-2">Teórico</th>
+                                <th class="p-2">Real</th>
+                                <th class="p-2">Merma</th>
+                                <th class="p-2">%</th>
+                                <th class="p-2">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaGuiasBody">
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-slate-400">No hay registros cargados.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Modal Instrucciones Power BI -->
+    <div id="modalPowerBI" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
+            <button onclick="cerrarModalPowerBI()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 class="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-chart-pie text-emerald-600"></i> Integración con Power BI
+            </h3>
+            <p class="text-xs text-slate-600 mb-4">
+                Exporta el archivo CSV desde esta app y conéctalo en Power BI Desktop. Usa estas fórmulas DAX recomendadas para tu reporte gerencial:
+            </p>
+            <div class="space-y-3 text-xs">
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <p class="font-bold text-slate-700">1. Porcentaje de Desperdicio:</p>
+                    <code class="text-blue-600 block mt-1">% Desperdicio = DIVIDE(SUM(registros[Merma_m3]), SUM(registros[Vol_Teorico]), 0)</code>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <p class="font-bold text-slate-700">2. Costo Total de Merma:</p>
+                    <code class="text-blue-600 block mt-1">Costo Merma = SUMX(registros, registros[Merma_m3] * registros[Costo_Unitario])</code>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <p class="font-bold text-slate-700">3. Desperdicio Acumulado (Running Total):</p>
+                    <code class="text-blue-600 block mt-1">Merma Acumulada = CALCULATE(SUM(registros[Merma_m3]), FILTER(ALL(registros), registros[Fecha] <= MAX(registros[Fecha])))</code>
+                </div>
+            </div>
+            <button onclick="cerrarModalPowerBI()" class="mt-5 w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 rounded-xl text-xs transition">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <!-- Lógica de la Aplicación -->
+    <script>
+        let registros = JSON.parse(localStorage.getItem('registrosConcreto')) || [];
+
+        document.getElementById('fecha').valueAsDate = new Date();
+        renderizarApp();
+
+        function registrarGuia(e) {
+            e.preventDefault();
+            
+            const fecha = document.getElementById('fecha').value;
+            const nroGuia = document.getElementById('nroGuia').value;
+            const proveedor = document.getElementById('proveedor').value;
+            const elemento = document.getElementById('elemento').value;
+            const volTeorico = parseFloat(document.getElementById('volTeorico').value);
+            const volReal = parseFloat(document.getElementById('volReal').value);
+            const costoUnitario = parseFloat(document.getElementById('costoUnitario').value);
+            const observaciones = document.getElementById('observaciones').value;
+
+            const merma = volReal - volTeorico;
+            const porcentaje = volTeorico > 0 ? (merma / volTeorico) * 100 : 0;
+            const costoMerma = merma > 0 ? merma * costoUnitario : 0;
+
+            const d = new Date(fecha);
+            d.setHours(0, 0, 0, 0);
+            d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+            const yearStart = new Date(d.getFullYear(), 0, 1);
+            const semana = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            const semanaStr = `Semana ${semana} - ${d.getFullYear()}`;
+
+            const nuevoRegistro = {
+                id: Date.now(),
+                fecha,
+                semana: semanaStr,
+                nroGuia,
+                proveedor,
+                elemento,
+                volTeorico,
+                volReal,
+                merma,
+                porcentaje,
+                costoUnitario,
+                costoMerma,
+                observaciones
+            };
+
+            registros.push(nuevoRegistro);
+            guardarYActualizar();
+            document.getElementById('formGuia').reset();
+            document.getElementById('fecha').valueAsDate = new Date();
+        }
+
+        function eliminarRegistro(id) {
+            registros = registros.filter(r => r.id !== id);
+            guardarYActualizar();
+        }
+
+        function limpiarRegistros() {
+            if (confirm('¿Deseas eliminar todo el historial de registros?')) {
+                registros = [];
+                guardarYActualizar();
+            }
+        }
+
+        function guardarYActualizar() {
+            localStorage.setItem('registrosConcreto', JSON.stringify(registros));
+            renderizarApp();
+        }
+
+        function renderizarApp() {
+            const tbodyGuias = document.getElementById('tablaGuiasBody');
+            const tbodySemanal = document.getElementById('tablaSemanalBody');
+            
+            tbodyGuias.innerHTML = '';
+            tbodySemanal.innerHTML = '';
+
+            if (registros.length === 0) {
+                tbodyGuias.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-slate-400">No hay registros cargados.</td></tr>`;
+                tbodySemanal.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-slate-400">Sin registros de guías aún.</td></tr>`;
+                
+                document.getElementById('kpiTeorico').innerText = '0.00 m³';
+                document.getElementById('kpiReal').innerText = '0.00 m³';
+                document.getElementById('kpiPorcentaje').innerText = '0.00%';
+                document.getElementById('kpiCosto').innerText = '$ 0.00';
+                return;
+            }
+
+            let totalTeorico = 0;
+            let totalReal = 0;
+            let totalCostoMerma = 0;
+            let semanasMap = {};
+
+            registros.forEach(r => {
+                totalTeorico += r.volTeorico;
+                totalReal += r.volReal;
+                totalCostoMerma += r.costoMerma;
+
+                if (!semanasMap[r.semana]) {
+                    semanasMap[r.semana] = { teorico: 0, real: 0, costo: 0 };
+                }
+                semanasMap[r.semana].teorico += r.volTeorico;
+                semanasMap[r.semana].real += r.volReal;
+                semanasMap[r.semana].costo += r.costoMerma;
+
+                const colorBadge = r.porcentaje > 3 ? 'text-rose-600 font-bold' : 'text-slate-700';
+                tbodyGuias.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-2">${r.fecha}</td>
+                        <td class="p-2 font-medium">${r.nroGuia}</td>
+                        <td class="p-2">${r.elemento}</td>
+                        <td class="p-2">${r.volTeorico.toFixed(2)}</td>
+                        <td class="p-2">${r.volReal.toFixed(2)}</td>
+                        <td class="p-2">${r.merma.toFixed(2)}</td>
+                        <td class="p-2 ${colorBadge}">${r.porcentaje.toFixed(1)}%</td>
+                        <td class="p-2">
+                            <button onclick="eliminarRegistro(${r.id})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            Object.keys(semanasMap).forEach(sem => {
+                let s = semanasMap[sem];
+                let mermaSem = s.real - s.teorico;
+                let porcSem = s.teorico > 0 ? (mermaSem / s.teorico) * 100 : 0;
+                let badgeColor = porcSem > 3 ? 'text-rose-600 font-bold bg-rose-50 px-1.5 py-0.5 rounded' : 'text-emerald-600 font-semibold';
+
+                tbodySemanal.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-2 font-semibold text-slate-800">${sem}</td>
+                        <td class="p-2">${s.teorico.toFixed(2)} m³</td>
+                        <td class="p-2">${s.real.toFixed(2)} m³</td>
+                        <td class="p-2">${mermaSem.toFixed(2)} m³</td>
+                        <td class="p-2 ${badgeColor}">${porcSem.toFixed(1)}%</td>
+                        <td class="p-2 text-rose-600 font-medium">$ ${s.costo.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            let mermaGlobal = totalReal - totalTeorico;
+            let porcentajeGlobal = totalTeorico > 0 ? (mermaGlobal / totalTeorico) * 100 : 0;
+
+            document.getElementById('kpiTeorico').innerText = totalTeorico.toFixed(2) + ' m³';
+            document.getElementById('kpiReal').innerText = totalReal.toFixed(2) + ' m³';
+            
+            const kpiP = document.getElementById('kpiPorcentaje');
+            kpiP.innerText = porcentajeGlobal.toFixed(2) + '%';
+            kpiP.className = porcentajeGlobal > 3 ? 'text-xl font-bold text-rose-600 mt-1' : 'text-xl font-bold text-emerald-600 mt-1';
+
+            document.getElementById('kpiCosto').innerText = '$ ' + totalCostoMerma.toFixed(2);
+        }
+
+        function exportarCSV() {
+            if (registros.length === 0) {
+                alert('No hay datos para exportar.');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,Fecha,Semana,NroGuia,Proveedor,Elemento,Vol_Teorico,Vol_Real,Merma_m3,Porcentaje_Desperdicio,Costo_Unitario,Costo_Merma,Observaciones\r\n";
+            
+            registros.forEach(r => {
+                let row = [r.fecha, r.semana, r.nroGuia, r.proveedor, r.elemento, r.volTeorico, r.volReal, r.merma, r.porcentaje.toFixed(2), r.costoUnitario, r.costoMerma.toFixed(2), `"${r.observaciones}"`];
+                csvContent += row.join(",") + "\r\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "control_desperdicio_concreto.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function abrirModalPowerBI() {
+            document.getElementById('modalPowerBI').classList.remove('hidden');
+        }
+
+        function cerrarModalPowerBI() {
+            document.getElementById('modalPowerBI').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
